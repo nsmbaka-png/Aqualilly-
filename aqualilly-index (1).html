@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <meta name="theme-color" content="#0077B6"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <title>AquaLilly Water</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#03045E;--ocean:#0077B6;--sky:#00B4D8;--aqua:#90E0EF;--foam:#CAF0F8;--white:#FFFFFF;--off:#F0F9FF;--text:#03045E;--muted:#4A7FA5;--border:#ADE8F4;--green:#06D6A0;--red:#EF233C;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);}
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;overflow:hidden;}
+    body{font-family:'DM Sans',sans-serif;background:var(--off);color:var(--text);display:flex;flex-direction:column;max-width:430px;margin:0 auto;box-shadow:0 0 60px rgba(0,0,0,0.18);}
+
+    /* SPLASH */
+    #splash{position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#03045E 0%,#0077B6 55%,#00B4D8 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.7s ease;}
+    #splash.hide{opacity:0;pointer-events:none;}
+    .ripple{position:absolute;border-radius:50%;border:2px solid rgba(255,255,255,0.15);animation:rippleOut 3s ease infinite;}
+    .ripple:nth-child(1){width:200px;height:200px;animation-delay:0s;}
+    .ripple:nth-child(2){width:340px;height:340px;animation-delay:0.7s;}
+    .ripple:nth-child(3){width:480px;height:480px;animation-delay:1.4s;}
+    @keyframes rippleOut{0%{transform:scale(0.7);opacity:0.6;}100%{transform:scale(1.3);opacity:0;}}
+    .splash-content{position:relative;z-index:2;text-align:center;}
+    .splash-box{width:100px;height:100px;border-radius:28px;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;font-size:3rem;margin:0 auto 20px;animation:popIn 0.8s cubic-bezier(.34,1.56,.64,1) 0.3s both;}
+    @keyframes popIn{from{transform:scale(0.4);opacity:0;}to{transform:scale(1);opacity:1;}}
+    .splash-brand{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:700;color:white;letter-spacing:2px;animation:fadeUp 0.5s ease 0.9s both;}
+    .splash-tag{font-size:0.8rem;color:rgba(255,255,255,0.7);letter-spacing:3px;text-transform:uppercase;animation:fadeUp 0.5s ease 1.1s both;margin-top:6px;}
+    .splash-dots{display:flex;gap:8px;margin-top:48px;justify-content:center;animation:fadeUp 0.5s ease 1.3s both;}
+    .splash-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.4);animation:dotP 1.2s ease infinite;}
+    .splash-dot:nth-child(2){animation-delay:0.2s;}.splash-dot:nth-child(3){animation-delay:0.4s;}
+    @keyframes dotP{0%,100%{background:rgba(255,255,255,0.3);transform:scale(1);}50%{background:white;transform:scale(1.4);}}
+    @keyframes fadeUp{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+    /* STATUS */
+    .status-bar{background:var(--navy);padding:calc(var(--safe-top)+8px) 20px 8px;display:flex;justify-content:space-between;font-size:0.71rem;font-weight:700;color:rgba(255,255,255,0.8);flex-shrink:0;}
+
+    /* HEADER */
+    .app-header{background:linear-gradient(160deg,var(--navy) 0%,var(--ocean) 70%,var(--sky) 100%);padding:16px 20px 0;flex-shrink:0;position:relative;overflow:hidden;}
+    .wave-svg{position:absolute;bottom:0;left:0;width:100%;height:28px;}
+    .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;position:relative;z-index:2;}
+    .header-brand{display:flex;align-items:center;gap:10px;}
+    .header-icon{width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
+    .header-name{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.35rem;color:white;letter-spacing:1px;}
+    .header-sub{font-size:0.68rem;color:rgba(255,255,255,0.65);margin-top:1px;}
+    .header-notif{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;border:1.5px solid rgba(255,255,255,0.2);}
+    .hero-pills{display:flex;gap:8px;margin-bottom:22px;position:relative;z-index:2;flex-wrap:wrap;}
+    .hero-pill{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);padding:6px 14px;border-radius:50px;font-size:0.74rem;font-weight:700;color:white;backdrop-filter:blur(6px);}
+
+    /* SCROLL */
+    .scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(72px + var(--safe-bottom));}
+    .scroll-area::-webkit-scrollbar{display:none;}
+
+    /* SCREENS */
+    .screen{display:none;padding:20px;animation:fadeIn 0.28s ease;}
+    .screen.active{display:block;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+    /* BOTTOM NAV */
+    .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:white;border-top:1.5px solid var(--border);display:flex;padding:8px 0 calc(8px + var(--safe-bottom));z-index:100;box-shadow:0 -4px 24px rgba(0,119,182,0.1);}
+    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;}
+    .nav-icon{font-size:1.35rem;transition:transform 0.2s;}
+    .nav-label{font-size:0.61rem;font-weight:700;color:var(--muted);}
+    .nav-item.active .nav-label{color:var(--ocean);}
+    .nav-item.active .nav-icon{transform:scale(1.18);}
+    .nav-center{flex:1;display:flex;flex-direction:column;align-items:center;cursor:pointer;margin-top:-22px;}
+    .nav-center-btn{width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,var(--navy),var(--sky));display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 18px rgba(0,119,182,0.45);transition:transform 0.2s;}
+    .nav-center-btn:active{transform:scale(0.9);}
+    .nav-center-label{font-size:0.6rem;font-weight:700;color:var(--ocean);margin-top:3px;}
+
+    /* UTILS */
+    .sec-title{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.3rem;color:var(--navy);margin-bottom:14px;letter-spacing:0.5px;}
+    .card{background:white;border-radius:22px;padding:20px;border:1.5px solid var(--border);box-shadow:0 4px 24px rgba(0,119,182,0.08);margin-bottom:16px;position:relative;overflow:hidden;}
+    .card-accent{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy),var(--sky));}
+    .btn-primary{width:100%;padding:15px;border-radius:14px;background:linear-gradient(135deg,var(--navy),var(--sky));color:white;border:none;font-family:'DM Sans',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;box-shadow:0 6px 22px rgba(0,119,182,0.35);transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn-primary:active{transform:scale(0.97);}
+    .btn-outline{width:100%;padding:13px;border-radius:14px;background:transparent;border:1.5px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;margin-top:10px;}
+    .form-label{font-size:0.74rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:7px;display:block;}
+    .form-input,.form-select,.form-textarea{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:0.93rem;background:var(--off);outline:none;color:var(--text);transition:border-color 0.2s;}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--ocean);background:white;}
+    .form-textarea{resize:none;min-height:72px;}
+    .form-group{margin-bottom:14px;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+    /* WATER HERO */
+    .water-hero{background:linear-gradient(135deg,var(--navy),var(--ocean));border-radius:22px;padding:22px 20px;margin-bottom:20px;position:relative;overflow:hidden;}
+    .water-hero h2{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:white;margin-bottom:8px;line-height:1.2;}
+    .water-hero p{font-size:0.83rem;color:rgba(255,255,255,0.78);line-height:1.6;margin-bottom:18px;}
+    .wh-stats{display:flex;background:rgba(255,255,255,0.1);border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.15);}
+    .wh-stat{flex:1;padding:12px 8px;text-align:center;border-right:1px solid rgba(255,255,255,0.12);}
+    .wh-stat:last-child{border-right:none;}
+    .wh-val{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:var(--aqua);}
+    .wh-label{font-size:0.64rem;color:rgba(255,255,255,0.6);font-weight:600;margin-top:2px;}
+
+    /* FEATURES */
+    .features-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+    .feat-chip{background:white;border:1.5px solid var(--border);border-radius:50px;padding:8px 14px;font-size:0.77rem;font-weight:700;color:var(--ocean);display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,119,182,0.06);}
+
+    /* SERVICES */
+    .service-row{background:white;border-radius:18px;padding:16px 18px;margin-bottom:12px;border:1.5px solid var(--border);box-shadow:0 3px 16px rgba(0,119,182,0.07);display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.22s;}
+    .service-row:active{transform:scale(0.98);border-color:var(--ocean);}
+    .svc-icon{width:50px;height:50px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
+    .svc-info{flex:1;}
+    .svc-name{font-weight:800;font-size:0.92rem;color:var(--text);margin-bottom:3px;}
+    .svc-desc{font-size:0.76rem;color:var(--muted);line-height:1.4;}
+    .svc-price{text-align:right;}
+    .svc-price-val{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:var(--ocean);}
+    .svc-price-unit{font-size:0.66rem;color:var(--muted);}
+
+    /* BOTTLES */
+    .bottle-row{display:flex;gap:10px;margin-bottom:20px;}
+    .bottle-card{flex:1;background:white;border-radius:18px;padding:14px 10px;text-align:center;border:1.5px solid var(--border);cursor:pointer;transition:all 0.2s;box-shadow:0 3px 14px rgba(0,119,182,0.06);}
+    .bottle-card.active{border-color:var(--ocean);background:var(--off);box-shadow:0 4px 18px rgba(0,119,182,0.18);}
+    .bottle-card:active{transform:scale(0.95);}
+    .bottle-emoji{font-size:2rem;margin-bottom:6px;}
+    .bottle-size{font-weight:800;font-size:0.84rem;color:var(--text);}
+    .bottle-price{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--ocean);font-weight:700;}
+
+    /* QTY */
+    .qty-ctrl{display:flex;align-items:center;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;background:var(--off);}
+    .qty-btn{width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;cursor:pointer;background:none;border:none;color:var(--ocean);}
+    .qty-btn:active{background:var(--foam);}
+    .qty-val{flex:1;text-align:center;font-weight:800;font-size:1.05rem;color:var(--text);}
+
+    /* PRICE */
+    .price-box{background:var(--off);border:1.5px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px;}
+    .p-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:0.88rem;}
+    .p-row+.p-row{border-top:1px dashed var(--border);}
+    .p-label{color:var(--muted);}
+    .p-val{font-weight:700;color:var(--ocean);}
+    .p-total{display:flex;justify-content:space-between;align-items:center;padding:10px 0 0;margin-top:4px;border-top:2px solid var(--border);}
+    .p-total-label{font-weight:800;color:var(--text);}
+    .p-total-val{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:var(--navy);}
+    .free-badge{background:linear-gradient(90deg,#D1FAE5,#A7F3D0);color:#065F46;font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:50px;}
+
+    /* MPESA */
+    .mpesa-card{background:linear-gradient(135deg,#1B5E20,#2E7D32);border-radius:14px;padding:16px;margin-bottom:16px;}
+    .mpesa-card h4{font-weight:800;font-size:0.92rem;color:white;margin-bottom:4px;}
+    .mpesa-card p{font-size:0.78rem;color:rgba(255,255,255,0.78);line-height:1.5;}
+    .mpesa-num{background:rgba(255,255,255,0.15);border-radius:8px;padding:8px 12px;margin-top:10px;font-weight:800;color:white;font-size:0.88rem;letter-spacing:1px;}
+    .mpesa-status{background:rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;margin-top:10px;display:none;}
+    .mpesa-status.show{display:block;}
+    .m-dots{display:flex;gap:5px;align-items:center;}
+    .m-dot{width:6px;height:6px;border-radius:50%;background:white;animation:dotP 1s ease infinite;}
+    .m-dot:nth-child(2){animation-delay:0.2s;}.m-dot:nth-child(3){animation-delay:0.4s;}
+    @keyframes dotP{0%,100%{opacity:0.3;}50%{opacity:1;transform:scale(1.3);}}
+
+    /* TRACK */
+    .track-bar{display:flex;align-items:center;margin:14px 0;}
+    .track-step{display:flex;flex-direction:column;align-items:center;flex:1;}
+    .track-dot{width:30px;height:30px;border-radius:50%;background:var(--border);border:2.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.72rem;color:var(--muted);font-weight:800;margin-bottom:5px;transition:all 0.3s;}
+    .track-dot.done{background:var(--ocean);border-color:var(--ocean);color:white;}
+    .track-dot.active{background:white;border-color:var(--ocean);color:var(--ocean);box-shadow:0 0 0 4px rgba(0,119,182,0.15);}
+    .track-line{flex:1;height:2px;background:var(--border);margin:0 2px;margin-bottom:22px;transition:background 0.3s;}
+    .track-line.done{background:var(--ocean);}
+    .track-label{font-size:0.6rem;font-weight:700;color:var(--muted);text-align:center;}
+    .track-label.active{color:var(--ocean);}
+
+    /* ORDER CARD */
+    .order-card{background:white;border-radius:20px;padding:18px;border:1.5px solid var(--border);box-shadow:0 4px 18px rgba(0,119,182,0.07);margin-bottom:14px;}
+    .order-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+    .order-id{font-size:0.7rem;color:var(--muted);font-weight:700;}
+    .order-svc{font-weight:800;font-size:0.94rem;color:var(--text);margin-top:2px;}
+    .status-badge{padding:4px 12px;border-radius:50px;font-size:0.7rem;font-weight:800;}
+    .s-pending{background:var(--foam);color:var(--ocean);}
+    .s-enroute{background:#FEF3C7;color:#92400E;}
+    .s-done{background:#D1FAE5;color:#065F46;}
+    .order-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+    .order-amount{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:700;color:var(--navy);}
+    .order-date{font-size:0.72rem;color:var(--muted);}
+
+    /* CONTACT */
+    .map-card{background:linear-gradient(135deg,var(--navy),var(--ocean));border-radius:20px;padding:20px;margin-bottom:14px;display:flex;align-items:center;gap:14px;cursor:pointer;text-decoration:none;}
+    .map-info h4{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.1rem;color:white;margin-bottom:4px;}
+    .map-info p{font-size:0.78rem;color:rgba(255,255,255,0.72);line-height:1.5;}
+    .c-item{display:flex;align-items:center;gap:14px;padding:13px;border-radius:14px;background:var(--off);margin-bottom:10px;cursor:pointer;text-decoration:none;transition:background 0.18s;}
+    .c-item:active{background:var(--foam);}
+    .c-icon{width:44px;height:44px;border-radius:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.25rem;}
+    .c-info h4{font-weight:800;font-size:0.88rem;color:var(--text);}
+    .c-info p{font-size:0.76rem;color:var(--muted);margin-top:1px;}
+
+    /* PRICING TABLE */
+    .p-table{border-radius:16px;overflow:hidden;border:1.5px solid var(--border);}
+    .p-thead{background:linear-gradient(90deg,var(--navy),var(--ocean));display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 16px;}
+    .p-thead span{font-size:0.72rem;font-weight:800;color:rgba(255,255,255,0.85);text-transform:uppercase;letter-spacing:0.5px;}
+    .p-trow{display:grid;grid-template-columns:1fr 1fr 1fr;padding:13px 16px;background:white;border-bottom:1px solid var(--border);align-items:center;}
+    .p-trow:last-child{border-bottom:none;}
+    .p-trow:nth-child(even){background:var(--off);}
+    .p-trow span{font-size:0.85rem;color:var(--text);}
+    .p-trow .p-price{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--ocean);font-weight:700;}
+    .p-trow .p-sub{color:var(--muted);font-size:0.78rem;}
+
+    /* MODAL */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(3,4,94,0.6);backdrop-filter:blur(8px);z-index:500;align-items:flex-end;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal-sheet{background:white;border-radius:28px 28px 0 0;padding:28px 24px calc(28px + var(--safe-bottom));width:100%;max-width:430px;animation:slideUp 0.35s cubic-bezier(.34,1.2,.64,1);}
+    @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+    .modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 22px;}
+    .modal-drop{text-align:center;font-size:4rem;margin-bottom:10px;}
+    .modal-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--navy);text-align:center;margin-bottom:8px;}
+    .modal-text{font-size:0.87rem;color:var(--muted);text-align:center;line-height:1.7;margin-bottom:20px;}
+    .modal-id{background:var(--off);border:1.5px solid var(--border);border-radius:12px;padding:12px;text-align:center;margin-bottom:20px;}
+    .modal-id span{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--ocean);font-weight:700;}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:white;padding:11px 22px;border-radius:50px;font-size:0.86rem;font-weight:700;z-index:9999;opacity:0;transition:all 0.3s;white-space:nowrap;box-shadow:0 6px 24px rgba(3,4,94,0.3);}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    .toast.success{background:var(--green);}
+    .toast.error{background:var(--red);}
+
+    .ke-stripe{height:4px;background:linear-gradient(90deg,#006600 33%,#000 33%,#000 66%,#BB0000 66%);flex-shrink:0;}
+  </style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="ripple"></div><div class="ripple"></div><div class="ripple"></div>
+  <div class="splash-content">
+    <div class="splash-box">💧</div>
+    <div class="splash-brand">AquaLilly</div>
+    <div class="splash-tag">Pure Water · Juja Farm Road</div>
+    <div class="splash-dots"><div class="splash-dot"></div><div class="splash-dot"></div><div class="splash-dot"></div></div>
+  </div>
+</div>
+
+<div class="ke-stripe"></div>
+<div class="status-bar"><span id="statusTime">9:41</span><span>📶 🔋</span></div>
+
+<div class="app-header">
+  <svg class="wave-svg" viewBox="0 0 430 28" preserveAspectRatio="none" fill="#F0F9FF">
+    <path d="M0,14 C70,0 140,28 215,14 C290,0 360,24 430,14 L430,28 L0,28 Z"/>
+  </svg>
+  <div class="header-top">
+    <div class="header-brand">
+      <div class="header-icon">💧</div>
+      <div>
+        <div class="header-name">AquaLilly</div>
+        <div class="header-sub" id="headerSub">📍 Juja Farm Road, Nairobi</div>
+      </div>
+    </div>
+    <div class="header-notif" onclick="showToast('No new notifications','')">🔔</div>
+  </div>
+  <div class="hero-pills">
+    <div class="hero-pill">💧 Purified Water</div>
+    <div class="hero-pill">🚚 Free Delivery</div>
+    <div class="hero-pill">🇰🇪 Juja Farm Rd</div>
+  </div>
+</div>
+
+<div class="scroll-area">
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="water-hero">
+      <h2>Clean Water,<br/>Delivered Fresh 💧</h2>
+      <p>Safe, purified drinking water for homes and offices along Juja Farm Road. Order now and get free delivery!</p>
+      <div class="wh-stats">
+        <div class="wh-stat"><div class="wh-val">20L</div><div class="wh-label">Jerrycan</div></div>
+        <div class="wh-stat"><div class="wh-val">FREE</div><div class="wh-label">Delivery</div></div>
+        <div class="wh-stat"><div class="wh-val">Daily</div><div class="wh-label">Service</div></div>
+        <div class="wh-stat"><div class="wh-val">💚</div><div class="wh-label">M-PESA</div></div>
+      </div>
+    </div>
+
+    <div class="features-row">
+      <div class="feat-chip">✅ Multi-Stage Filtration</div>
+      <div class="feat-chip">🧪 Quality Tested</div>
+      <div class="feat-chip">🚚 Free Delivery</div>
+      <div class="feat-chip">📱 M-PESA Pay</div>
+    </div>
+
+    <div class="sec-title">Our Services</div>
+
+    <div class="service-row" onclick="goTo('book')">
+      <div class="svc-icon" style="background:#E0F7FA;">💧</div>
+      <div class="svc-info"><div class="svc-name">Water Refilling</div><div class="svc-desc">Bring your jerrycan — we refill with purified water on the spot</div></div>
+      <div class="svc-price"><div class="svc-price-val">Ksh 10</div><div class="svc-price-unit">per litre</div></div>
+    </div>
+
+    <div class="service-row" onclick="goTo('book')">
+      <div class="svc-icon" style="background:#E8F5E9;">🚚</div>
+      <div class="svc-info"><div class="svc-name">Home Delivery</div><div class="svc-desc">We deliver filled jerrycans straight to your door — absolutely free</div></div>
+      <div class="svc-price"><div class="svc-price-val" style="color:var(--green);">FREE</div><div class="svc-price-unit">delivery</div></div>
+    </div>
+
+    <div class="service-row" onclick="goTo('book')">
+      <div class="svc-icon" style="background:#EDE7F6;">🏢</div>
+      <div class="svc-info"><div class="svc-name">Bulk / Office Orders</div><div class="svc-desc">Multiple jerrycans for offices, events & bulk needs — bulk discounts apply</div></div>
+      <div class="svc-price"><div class="svc-price-val">Bulk</div><div class="svc-price-unit">discounts</div></div>
+    </div>
+
+    <div class="sec-title" style="margin-top:4px;">How It Works</div>
+    <div class="card">
+      <div class="card-accent"></div>
+      <div style="display:flex;flex-direction:column;gap:16px;padding-top:4px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;"><div style="width:34px;height:34px;border-radius:10px;background:var(--ocean);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">1</div><div><div style="font-weight:800;font-size:0.88rem;margin-bottom:3px;">Place Your Order</div><div style="font-size:0.78rem;color:var(--muted);line-height:1.5;">Choose size, quantity & delivery time right here in the app.</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;"><div style="width:34px;height:34px;border-radius:10px;background:var(--ocean);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">2</div><div><div style="font-weight:800;font-size:0.88rem;margin-bottom:3px;">Pay via M-PESA</div><div style="font-size:0.78rem;color:var(--muted);line-height:1.5;">Receive M-PESA STK push to your phone — enter PIN to confirm.</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;"><div style="width:34px;height:34px;border-radius:10px;background:var(--ocean);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">3</div><div><div style="font-weight:800;font-size:0.88rem;margin-bottom:3px;">Free Delivery to You</div><div style="font-size:0.78rem;color:var(--muted);line-height:1.5;">Fresh purified water at your doorstep — no extra delivery charge.</div></div></div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,var(--foam),var(--off));border:1.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:20px;display:flex;gap:12px;">
+      <span style="font-size:1.6rem;">🧪</span>
+      <div><div style="font-weight:800;font-size:0.88rem;color:var(--navy);margin-bottom:4px;">Quality Guaranteed</div><div style="font-size:0.78rem;color:var(--muted);line-height:1.6;">Multi-stage filtration and purification. Safe for drinking, cooking and infants.</div></div>
+    </div>
+  </div>
+
+  <!-- BOOK -->
+  <div class="screen" id="screen-book">
+    <div class="card">
+      <div class="card-accent"></div>
+      <div class="sec-title" style="margin-bottom:16px;">💧 Choose Jerrycan Size</div>
+      <div class="bottle-row">
+        <div class="bottle-card active" id="b-10" onclick="selectBottle(10,100)"><div class="bottle-emoji">🪣</div><div class="bottle-size">10 L</div><div class="bottle-price">Ksh 100</div></div>
+        <div class="bottle-card" id="b-20" onclick="selectBottle(20,200)"><div class="bottle-emoji">🫙</div><div class="bottle-size">20 L</div><div class="bottle-price">Ksh 200</div></div>
+        <div class="bottle-card" id="b-50" onclick="selectBottle(50,500)"><div class="bottle-emoji">🛢️</div><div class="bottle-size">50 L</div><div class="bottle-price">Ksh 500</div></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Number of Jerrycans</label>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <div class="qty-val" id="qtyVal">1</div>
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-accent"></div>
+      <div class="sec-title" style="margin-bottom:16px;">📋 Delivery Details</div>
+      <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="custName" placeholder="e.g. John Kamau"/></div>
+      <div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="custPhone" placeholder="e.g. 0712345678"/></div>
+      <div class="form-group"><label class="form-label">Delivery Address</label><input type="text" class="form-input" id="custAddr" placeholder="e.g. Juja Farm Road, House 12"/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="pickDate"/></div>
+        <div class="form-group"><label class="form-label">Time</label>
+          <select class="form-select" id="pickTime">
+            <option>7AM–9AM</option><option>9AM–11AM</option><option>11AM–1PM</option>
+            <option>1PM–3PM</option><option>3PM–5PM</option><option>5PM–7PM</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Payment</label>
+        <select class="form-select" id="payMethod" onchange="toggleMpesa()">
+          <option value="mpesa">M-PESA (STK Push)</option>
+          <option value="cash">Cash on Delivery</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Notes (optional)</label><textarea class="form-textarea" id="custNotes" placeholder="e.g. Gate colour, landmark near you..."></textarea></div>
+    </div>
+
+    <div class="price-box">
+      <div class="p-row"><span class="p-label" id="priceLabel">10L × 1 jerrycan</span><span class="p-val" id="priceBase">Ksh 100</span></div>
+      <div class="p-row"><span class="p-label">Delivery</span><span><span class="free-badge">FREE</span></span></div>
+      <div class="p-total"><span class="p-total-label">Total</span><span class="p-total-val" id="priceTotal">Ksh 100</span></div>
+    </div>
+
+    <div class="mpesa-card" id="mpesaBox">
+      <h4>💚 M-PESA Payment</h4>
+      <p>An M-PESA prompt will be sent to your phone. Enter your PIN to complete payment.</p>
+      <div class="mpesa-num">Pay to: +254 768 478 099 (AquaLilly)</div>
+      <div class="mpesa-status" id="mpesaStatus">
+        <div class="m-dots"><div class="m-dot"></div><div class="m-dot"></div><div class="m-dot"></div>
+        <span style="color:white;font-size:0.77rem;margin-left:8px;font-weight:700;" id="mpesaText">Sending prompt...</span></div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="handleBooking()">💧 Confirm Order</button>
+    <div style="height:12px;"></div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="screen" id="screen-orders">
+    <div class="sec-title">My Orders</div>
+    <div class="order-card">
+      <div class="order-hdr"><div><div class="order-id">#AQ-2024-001</div><div class="order-svc">20L Jerrycan × 2</div></div><span class="status-badge s-enroute">🚚 En Route</span></div>
+      <div class="track-bar">
+        <div class="track-step"><div class="track-dot done">✓</div><div class="track-label active">Booked</div></div>
+        <div class="track-line done"></div>
+        <div class="track-step"><div class="track-dot done">✓</div><div class="track-label active">Confirmed</div></div>
+        <div class="track-line done"></div>
+        <div class="track-step"><div class="track-dot active">3</div><div class="track-label active">En Route</div></div>
+        <div class="track-line"></div>
+        <div class="track-step"><div class="track-dot">4</div><div class="track-label">Delivered</div></div>
+      </div>
+      <div class="order-footer"><span class="order-amount">Ksh 400</span><span class="order-date">Today, 10:00 AM</span></div>
+    </div>
+    <div class="order-card">
+      <div class="order-hdr"><div><div class="order-id">#AQ-2024-002</div><div class="order-svc">10L Jerrycan × 3</div></div><span class="status-badge s-done">✅ Delivered</span></div>
+      <div class="track-bar">
+        <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">Booked</div></div>
+        <div class="track-line done"></div>
+        <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">Confirmed</div></div>
+        <div class="track-line done"></div>
+        <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">En Route</div></div>
+        <div class="track-line done"></div>
+        <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">Delivered</div></div>
+      </div>
+      <div class="order-footer"><span class="order-amount">Ksh 300</span><span class="order-date">Yesterday</span></div>
+    </div>
+    <div style="text-align:center;padding:8px 0 20px;">
+      <button class="btn-primary" style="width:auto;padding:13px 28px;" onclick="goTo('book')">+ New Order</button>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="screen" id="screen-pricing">
+    <div class="sec-title">Pricing</div>
+    <div style="background:linear-gradient(135deg,var(--navy),var(--ocean));border-radius:16px;padding:18px;margin-bottom:16px;text-align:center;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:white;">Ksh 10 per litre</div>
+      <div style="font-size:0.82rem;color:rgba(255,255,255,0.8);margin-top:4px;">Transparent pricing for all sizes</div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="card-accent"></div>
+      <div class="p-table">
+        <div class="p-thead"><span>Size</span><span>Litres</span><span>Price</span></div>
+        <div class="p-trow"><span>🪣 Small</span><span class="p-sub">10 litres</span><span class="p-price">Ksh 100</span></div>
+        <div class="p-trow"><span>🫙 Standard</span><span class="p-sub">20 litres</span><span class="p-price">Ksh 200</span></div>
+        <div class="p-trow"><span>🛢️ Large</span><span class="p-sub">50 litres</span><span class="p-price">Ksh 500</span></div>
+        <div class="p-trow"><span>🏢 Bulk 100L</span><span class="p-sub">100 litres</span><span class="p-price">Ksh 1,000</span></div>
+        <div class="p-trow"><span>🚚 Delivery</span><span class="p-sub">Any size</span><span style="font-weight:800;font-size:0.85rem;color:var(--green);">FREE</span></div>
+      </div>
+    </div>
+    <div style="background:var(--off);border:1.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:16px;">
+      <div style="font-weight:800;font-size:0.88rem;color:var(--navy);margin-bottom:8px;">💡 Bulk Discounts</div>
+      <div style="font-size:0.82rem;color:var(--muted);line-height:1.7;">Order 5+ jerrycans → <strong style="color:var(--ocean);">10% off</strong>. Order 10+ → <strong style="color:var(--ocean);">15% off</strong>. WhatsApp us for large orders!</div>
+    </div>
+    <div style="background:linear-gradient(135deg,var(--navy),var(--ocean));border-radius:16px;padding:18px;margin-bottom:16px;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:700;color:white;margin-bottom:6px;">💚 Payment</div>
+      <div style="font-size:0.82rem;color:rgba(255,255,255,0.8);line-height:1.7;">M-PESA: <strong style="color:var(--aqua);">+254 768 478 099</strong> (AquaLilly)<br/>Cash on delivery also accepted.</div>
+    </div>
+    <button class="btn-primary" onclick="goTo('book')">💧 Order Now</button>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="screen" id="screen-contact">
+    <div class="sec-title">Contact Us</div>
+    <a class="map-card" href="https://maps.google.com/?q=Juja+Farm+Road+Nairobi+Kenya" target="_blank">
+      <span style="font-size:2.2rem;">📍</span>
+      <div class="map-info"><h4>Juja Farm Road</h4><p>Nairobi, Kenya<br/>Tap to open in Google Maps</p></div>
+    </a>
+    <div class="card">
+      <div class="card-accent"></div>
+      <div class="sec-title" style="margin-bottom:14px;">📞 Get In Touch</div>
+      <a class="c-item" href="https://wa.me/254768478099?text=Hello%20AquaLilly!%20I%20would%20like%20to%20order%20water." target="_blank">
+        <div class="c-icon" style="background:#E8F5E9;">💬</div><div class="c-info"><h4>WhatsApp</h4><p>Chat with us instantly</p></div><span style="margin-left:auto;color:var(--muted);">›</span>
+      </a>
+      <a class="c-item" href="tel:+254768478099">
+        <div class="c-icon" style="background:var(--foam);">📱</div><div class="c-info"><h4>Call Us</h4><p>+254 768 478 099</p></div><span style="margin-left:auto;color:var(--muted);">›</span>
+      </a>
+      <div class="c-item"><div class="c-icon" style="background:#FEF3C7;">🕐</div><div class="c-info"><h4>Working Hours</h4><p>Daily: 7AM – 7PM</p></div></div>
+      <div class="c-item"><div class="c-icon" style="background:#EDE7F6;">📍</div><div class="c-info"><h4>Location</h4><p>Juja Farm Road, Nairobi</p></div></div>
+    </div>
+    <div style="background:linear-gradient(135deg,var(--navy),var(--ocean));border-radius:18px;padding:20px;text-align:center;">
+      <div style="font-size:2rem;margin-bottom:8px;">💧</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:white;margin-bottom:6px;">AquaLilly Water</div>
+      <div style="font-size:0.78rem;color:rgba(255,255,255,0.7);line-height:1.6;">Pure. Safe. Delivered Fresh.<br/>Juja Farm Road · Nairobi 🇰🇪</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="nav-item active" id="nav-home" onclick="goTo('home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+  <div class="nav-item" id="nav-pricing" onclick="goTo('pricing')"><div class="nav-icon">💰</div><div class="nav-label">Pricing</div></div>
+  <div class="nav-center" onclick="goTo('book')"><div class="nav-center-btn">💧</div><div class="nav-center-label">Order</div></div>
+  <div class="nav-item" id="nav-orders" onclick="goTo('orders')"><div class="nav-icon">📦</div><div class="nav-label">Orders</div></div>
+  <div class="nav-item" id="nav-contact" onclick="goTo('contact')"><div class="nav-icon">📞</div><div class="nav-label">Contact</div></div>
+</nav>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-drop">💧</div>
+    <div class="modal-title">Order Confirmed!</div>
+    <div class="modal-text" id="modalText">Your water delivery has been booked. We'll WhatsApp you shortly!</div>
+    <div class="modal-id">Order ID: <span id="modalOrderId">#AQ-2024-003</span></div>
+    <button class="btn-primary" onclick="whatsappConfirm()" style="margin-bottom:10px;">💬 Confirm on WhatsApp</button>
+    <button class="btn-outline" onclick="closeModal();goTo('orders')">View My Orders</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const state={litres:10,price:100,qty:1,orderCount:2,lastBooking:null};
+
+setTimeout(()=>{document.getElementById('splash').classList.add('hide');setTimeout(()=>document.getElementById('splash').remove(),800);},2400);
+
+function updateClock(){const n=new Date();document.getElementById('statusTime').textContent=`${n.getHours()}:${n.getMinutes().toString().padStart(2,'0')}`;}
+updateClock();setInterval(updateClock,10000);
+
+document.getElementById('pickDate').min=new Date().toISOString().split('T')[0];
+document.getElementById('pickDate').value=new Date().toISOString().split('T')[0];
+
+function goTo(s){
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('screen-'+s).classList.add('active');
+  const el=document.getElementById('nav-'+s);if(el)el.classList.add('active');
+  document.querySelector('.scroll-area').scrollTop=0;
+  const subs={home:'📍 Juja Farm Road, Nairobi',book:'💧 Place Your Order',orders:'📦 Track Deliveries',pricing:'💰 Our Pricing',contact:'📞 Get In Touch'};
+  document.getElementById('headerSub').textContent=subs[s]||'📍 Juja Farm Road';
+}
+
+function selectBottle(l,p){
+  state.litres=l;state.price=p;
+  document.querySelectorAll('.bottle-card').forEach(b=>b.classList.remove('active'));
+  document.getElementById('b-'+l).classList.add('active');
+  updatePrice();
+}
+
+function changeQty(d){state.qty=Math.max(1,state.qty+d);document.getElementById('qtyVal').textContent=state.qty;updatePrice();}
+
+function updatePrice(){
+  const t=state.price*state.qty;
+  document.getElementById('priceLabel').textContent=`${state.litres}L × ${state.qty} jerrycan${state.qty>1?'s':''}`;
+  document.getElementById('priceBase').textContent=`Ksh ${t.toLocaleString()}`;
+  document.getElementById('priceTotal').textContent=`Ksh ${t.toLocaleString()}`;
+}
+updatePrice();
+
+function toggleMpesa(){document.getElementById('mpesaBox').style.display=document.getElementById('payMethod').value==='mpesa'?'block':'none';}
+
+async function initStkPush(phone,amount){
+  const s=document.getElementById('mpesaStatus'),t=document.getElementById('mpesaText');
+  s.classList.add('show');t.textContent=`Sending M-PESA prompt to ${phone}...`;
+  await new Promise(r=>setTimeout(r,2000));
+  t.textContent='Check your phone for M-PESA PIN prompt ✓';
+  await new Promise(r=>setTimeout(r,1500));
+  s.classList.remove('show');
+}
+
+async function handleBooking(){
+  const name=document.getElementById('custName').value.trim();
+  const phone=document.getElementById('custPhone').value.trim();
+  const addr=document.getElementById('custAddr').value.trim();
+  const date=document.getElementById('pickDate').value;
+  const method=document.getElementById('payMethod').value;
+  if(!name){showToast('Please enter your name','error');return;}
+  if(!phone){showToast('Please enter your phone number','error');return;}
+  if(!addr){showToast('Please enter your delivery address','error');return;}
+  if(!date){showToast('Please select a delivery date','error');return;}
+  const amount=state.price*state.qty;
+  if(method==='mpesa')await initStkPush(phone,amount);
+  state.orderCount++;
+  const orderId=`#AQ-2024-00${state.orderCount}`;
+  document.getElementById('modalOrderId').textContent=orderId;
+  document.getElementById('modalText').textContent=`${orderId} placed! ${method==='mpesa'?'M-PESA payment initiated. ':''}We'll WhatsApp to confirm your delivery.`;
+  state.lastBooking={name,phone,addr,date,litres:state.litres,qty:state.qty,amount,orderId};
+  document.getElementById('successModal').classList.add('open');
+}
+
+function whatsappConfirm(){
+  const b=state.lastBooking||{};
+  const msg=encodeURIComponent(`Hello AquaLilly! 💧
+
+New Water Order ${b.orderId}
+Name: ${b.name}
+Phone: ${b.phone}
+Address: ${b.addr}
+Order: ${b.litres}L × ${b.qty} jerrycan${b.qty>1?'s':''}
+Date: ${b.date}
+Total: Ksh ${b.amount?.toLocaleString()}
+
+Free delivery ✅`);
+  window.open(`https://wa.me/254768478099?text=${msg}`,'_blank');
+  closeModal();goTo('orders');showToast('✅ Order sent via WhatsApp!','success');
+}
+
+function closeModal(){document.getElementById('successModal').classList.remove('open');}
+document.getElementById('successModal').addEventListener('click',e=>{if(e.target===document.getElementById('successModal'))closeModal();});
+
+function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.className='toast',3200);}
+</script>
+</body>
+</html>
